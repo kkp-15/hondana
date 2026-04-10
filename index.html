@@ -400,6 +400,36 @@
   .conditional { display: none; }
   .conditional.show { display: block; }
 
+  .field label .req {
+    color: var(--danger);
+    font-size: 10px;
+    margin-left: 2px;
+  }
+
+  .optional-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0 14px;
+    font-size: 11px;
+    color: var(--text-sub);
+  }
+
+  .optional-divider::before,
+  .optional-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .optional-section .field label { color: #B0A098; }
+  .optional-section .field input,
+  .optional-section .field select,
+  .optional-section .field textarea {
+    border-color: #F0E8E0;
+  }
+
   /* ── Rating ── */
   .stars { display: flex; gap: 4px; }
   .star {
@@ -478,51 +508,40 @@
       <button class="type-tab active" data-type="borrow">📚 借りてる</button>
       <button class="type-tab" data-type="own">📖 持ってる</button>
     </div>
+    <!-- 必須 -->
     <div class="field">
-      <label>タイトル</label>
+      <label>タイトル <span class="req">*</span></label>
       <input type="text" id="add-title" placeholder="本のタイトル">
     </div>
-    <div class="field">
-      <label>著者（任意）</label>
-      <input type="text" id="add-author" placeholder="著者名">
-    </div>
-    <div class="conditional" id="add-borrow-fields">
+    <div class="conditional" id="add-borrow-req">
       <div class="field">
-        <label>返却期限</label>
+        <label>返却期限 <span class="req">*</span></label>
         <input type="date" id="add-due">
       </div>
-      <div class="field">
-        <label>読書ステータス</label>
-        <select id="add-borrow-status">
-          <option value="unread">未読</option>
-          <option value="reading">読書中</option>
-          <option value="done">読了</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>ページ数（任意）</label>
-        <input type="number" id="add-borrow-pages" placeholder="例: 320" min="0">
-      </div>
-      <div class="field">
-        <label>メモ（任意）</label>
-        <textarea id="add-borrow-memo" placeholder="感想やメモ"></textarea>
-      </div>
     </div>
-    <div class="conditional" id="add-own-fields">
+
+    <div class="optional-divider">スキップOK</div>
+
+    <!-- 任意 -->
+    <div class="optional-section">
+      <div class="field">
+        <label>著者</label>
+        <input type="text" id="add-author" placeholder="著者名">
+      </div>
       <div class="field">
         <label>読書ステータス</label>
-        <select id="add-status">
+        <select id="add-common-status">
           <option value="unread">未読</option>
           <option value="reading">読書中</option>
           <option value="done">読了</option>
         </select>
       </div>
       <div class="field">
-        <label>ページ数（任意）</label>
+        <label>ページ数</label>
         <input type="number" id="add-pages" placeholder="例: 320" min="0">
       </div>
       <div class="field">
-        <label>メモ（任意）</label>
+        <label>メモ</label>
         <textarea id="add-memo" placeholder="感想やメモ"></textarea>
       </div>
     </div>
@@ -537,41 +556,28 @@
     <div class="modal-handle"></div>
     <h2 id="edit-modal-title">編集</h2>
     <input type="hidden" id="edit-id">
+    <input type="hidden" id="edit-type">
+
+    <!-- 必須 -->
     <div class="field">
-      <label>タイトル</label>
+      <label>タイトル <span class="req">*</span></label>
       <input type="text" id="edit-title">
     </div>
-    <div class="field">
-      <label>著者</label>
-      <input type="text" id="edit-author">
-    </div>
-    <div class="conditional" id="edit-borrow-fields">
+    <div class="conditional" id="edit-borrow-req">
       <div class="field">
-        <label>返却期限</label>
+        <label>返却期限 <span class="req">*</span></label>
         <input type="date" id="edit-due">
       </div>
-      <div class="field">
-        <label>読書ステータス</label>
-        <select id="edit-borrow-status">
-          <option value="unread">未読</option>
-          <option value="reading">読書中</option>
-          <option value="done">読了</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>読んだページ / 総ページ</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="number" id="edit-borrow-current-page" placeholder="今" min="0" style="flex:1">
-          <span style="color:var(--text-sub)">/</span>
-          <input type="number" id="edit-borrow-pages" placeholder="全体" min="0" style="flex:1">
-        </div>
-      </div>
-      <div class="field">
-        <label>メモ</label>
-        <textarea id="edit-borrow-memo" placeholder="感想やメモ"></textarea>
-      </div>
     </div>
-    <div class="conditional" id="edit-own-fields">
+
+    <div class="optional-divider">スキップOK</div>
+
+    <!-- 任意 -->
+    <div class="optional-section">
+      <div class="field">
+        <label>著者</label>
+        <input type="text" id="edit-author">
+      </div>
       <div class="field">
         <label>読書ステータス</label>
         <select id="edit-status">
@@ -674,10 +680,7 @@ document.getElementById('fab').onclick = () => {
   document.getElementById('add-title').value = '';
   document.getElementById('add-author').value = '';
   document.getElementById('add-due').value = '';
-  document.getElementById('add-borrow-status').value = 'unread';
-  document.getElementById('add-borrow-pages').value = '';
-  document.getElementById('add-borrow-memo').value = '';
-  document.getElementById('add-status').value = 'unread';
+  document.getElementById('add-common-status').value = 'unread';
   document.getElementById('add-pages').value = '';
   document.getElementById('add-memo').value = '';
   mAdd.classList.add('show');
@@ -689,8 +692,7 @@ document.querySelectorAll('.type-tab').forEach(t => {
 
 function updAddType() {
   document.querySelectorAll('.type-tab').forEach(t => t.classList.toggle('active', t.dataset.type === addType));
-  document.getElementById('add-borrow-fields').classList.toggle('show', addType === 'borrow');
-  document.getElementById('add-own-fields').classList.toggle('show', addType === 'own');
+  document.getElementById('add-borrow-req').classList.toggle('show', addType === 'borrow');
 }
 
 document.getElementById('btn-add-cancel').onclick = () => mAdd.classList.remove('show');
@@ -702,19 +704,15 @@ document.getElementById('btn-add').onclick = () => {
 
   const book = { id: genId(), title, author: document.getElementById('add-author').value.trim(), type: addType, createdAt: new Date().toISOString() };
 
+  book.status = document.getElementById('add-common-status').value;
+  book.totalPages = parseInt(document.getElementById('add-pages').value) || 0;
+  book.currentPage = 0;
+  book.memo = document.getElementById('add-memo').value.trim();
+  book.rating = 0;
+
   if (addType === 'borrow') {
     book.dueDate = document.getElementById('add-due').value;
     if (!book.dueDate) return document.getElementById('add-due').focus();
-    book.status = document.getElementById('add-borrow-status').value;
-    book.totalPages = parseInt(document.getElementById('add-borrow-pages').value) || 0;
-    book.currentPage = 0;
-    book.memo = document.getElementById('add-borrow-memo').value.trim();
-  } else {
-    book.status = document.getElementById('add-status').value;
-    book.totalPages = parseInt(document.getElementById('add-pages').value) || 0;
-    book.currentPage = 0;
-    book.memo = document.getElementById('add-memo').value.trim();
-    book.rating = 0;
   }
 
   const books = load(); books.push(book); save(books);
@@ -747,28 +745,25 @@ function openEdit(id) {
   const book = load().find(b => b.id === id);
   if (!book) return;
   document.getElementById('edit-id').value = id;
+  document.getElementById('edit-type').value = book.type;
   document.getElementById('edit-title').value = book.title;
   document.getElementById('edit-author').value = book.author || '';
 
   const isBorrow = book.type === 'borrow';
-  document.getElementById('edit-borrow-fields').classList.toggle('show', isBorrow);
-  document.getElementById('edit-own-fields').classList.toggle('show', !isBorrow);
+  document.getElementById('edit-borrow-req').classList.toggle('show', isBorrow);
   document.getElementById('edit-modal-title').textContent = isBorrow ? '借りてる本を編集' : '持ってる本を編集';
 
   if (isBorrow) {
     document.getElementById('edit-due').value = book.dueDate || '';
-    document.getElementById('edit-borrow-status').value = book.status || 'unread';
-    document.getElementById('edit-borrow-current-page').value = book.currentPage || '';
-    document.getElementById('edit-borrow-pages').value = book.totalPages || '';
-    document.getElementById('edit-borrow-memo').value = book.memo || '';
-  } else {
-    document.getElementById('edit-status').value = book.status || 'unread';
-    document.getElementById('edit-current-page').value = book.currentPage || '';
-    document.getElementById('edit-pages').value = book.totalPages || '';
-    document.getElementById('edit-memo').value = book.memo || '';
-    editRating = book.rating || 0;
-    updStars();
   }
+
+  document.getElementById('edit-status').value = book.status || 'unread';
+  document.getElementById('edit-current-page').value = book.currentPage || '';
+  document.getElementById('edit-pages').value = book.totalPages || '';
+  document.getElementById('edit-memo').value = book.memo || '';
+  editRating = book.rating || 0;
+  updStars();
+
   mEdit.classList.add('show');
 }
 
@@ -780,19 +775,14 @@ document.getElementById('btn-update').onclick = () => {
 
   b.title = document.getElementById('edit-title').value.trim() || b.title;
   b.author = document.getElementById('edit-author').value.trim();
+  b.status = document.getElementById('edit-status').value;
+  b.currentPage = parseInt(document.getElementById('edit-current-page').value) || 0;
+  b.totalPages = parseInt(document.getElementById('edit-pages').value) || 0;
+  b.memo = document.getElementById('edit-memo').value.trim();
+  b.rating = editRating;
 
   if (b.type === 'borrow') {
     b.dueDate = document.getElementById('edit-due').value || b.dueDate;
-    b.status = document.getElementById('edit-borrow-status').value;
-    b.currentPage = parseInt(document.getElementById('edit-borrow-current-page').value) || 0;
-    b.totalPages = parseInt(document.getElementById('edit-borrow-pages').value) || 0;
-    b.memo = document.getElementById('edit-borrow-memo').value.trim();
-  } else {
-    b.status = document.getElementById('edit-status').value;
-    b.currentPage = parseInt(document.getElementById('edit-current-page').value) || 0;
-    b.totalPages = parseInt(document.getElementById('edit-pages').value) || 0;
-    b.memo = document.getElementById('edit-memo').value.trim();
-    b.rating = editRating;
   }
 
   save(books); mEdit.classList.remove('show'); render();
