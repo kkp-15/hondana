@@ -491,6 +491,22 @@
         <label>返却期限</label>
         <input type="date" id="add-due">
       </div>
+      <div class="field">
+        <label>読書ステータス</label>
+        <select id="add-borrow-status">
+          <option value="unread">未読</option>
+          <option value="reading">読書中</option>
+          <option value="done">読了</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>ページ数（任意）</label>
+        <input type="number" id="add-borrow-pages" placeholder="例: 320" min="0">
+      </div>
+      <div class="field">
+        <label>メモ（任意）</label>
+        <textarea id="add-borrow-memo" placeholder="感想やメモ"></textarea>
+      </div>
     </div>
     <div class="conditional" id="add-own-fields">
       <div class="field">
@@ -533,6 +549,26 @@
       <div class="field">
         <label>返却期限</label>
         <input type="date" id="edit-due">
+      </div>
+      <div class="field">
+        <label>読書ステータス</label>
+        <select id="edit-borrow-status">
+          <option value="unread">未読</option>
+          <option value="reading">読書中</option>
+          <option value="done">読了</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>読んだページ / 総ページ</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="number" id="edit-borrow-current-page" placeholder="今" min="0" style="flex:1">
+          <span style="color:var(--text-sub)">/</span>
+          <input type="number" id="edit-borrow-pages" placeholder="全体" min="0" style="flex:1">
+        </div>
+      </div>
+      <div class="field">
+        <label>メモ</label>
+        <textarea id="edit-borrow-memo" placeholder="感想やメモ"></textarea>
       </div>
     </div>
     <div class="conditional" id="edit-own-fields">
@@ -638,6 +674,9 @@ document.getElementById('fab').onclick = () => {
   document.getElementById('add-title').value = '';
   document.getElementById('add-author').value = '';
   document.getElementById('add-due').value = '';
+  document.getElementById('add-borrow-status').value = 'unread';
+  document.getElementById('add-borrow-pages').value = '';
+  document.getElementById('add-borrow-memo').value = '';
   document.getElementById('add-status').value = 'unread';
   document.getElementById('add-pages').value = '';
   document.getElementById('add-memo').value = '';
@@ -666,6 +705,10 @@ document.getElementById('btn-add').onclick = () => {
   if (addType === 'borrow') {
     book.dueDate = document.getElementById('add-due').value;
     if (!book.dueDate) return document.getElementById('add-due').focus();
+    book.status = document.getElementById('add-borrow-status').value;
+    book.totalPages = parseInt(document.getElementById('add-borrow-pages').value) || 0;
+    book.currentPage = 0;
+    book.memo = document.getElementById('add-borrow-memo').value.trim();
   } else {
     book.status = document.getElementById('add-status').value;
     book.totalPages = parseInt(document.getElementById('add-pages').value) || 0;
@@ -714,6 +757,10 @@ function openEdit(id) {
 
   if (isBorrow) {
     document.getElementById('edit-due').value = book.dueDate || '';
+    document.getElementById('edit-borrow-status').value = book.status || 'unread';
+    document.getElementById('edit-borrow-current-page').value = book.currentPage || '';
+    document.getElementById('edit-borrow-pages').value = book.totalPages || '';
+    document.getElementById('edit-borrow-memo').value = book.memo || '';
   } else {
     document.getElementById('edit-status').value = book.status || 'unread';
     document.getElementById('edit-current-page').value = book.currentPage || '';
@@ -736,6 +783,10 @@ document.getElementById('btn-update').onclick = () => {
 
   if (b.type === 'borrow') {
     b.dueDate = document.getElementById('edit-due').value || b.dueDate;
+    b.status = document.getElementById('edit-borrow-status').value;
+    b.currentPage = parseInt(document.getElementById('edit-borrow-current-page').value) || 0;
+    b.totalPages = parseInt(document.getElementById('edit-borrow-pages').value) || 0;
+    b.memo = document.getElementById('edit-borrow-memo').value.trim();
   } else {
     b.status = document.getElementById('edit-status').value;
     b.currentPage = parseInt(document.getElementById('edit-current-page').value) || 0;
@@ -830,13 +881,28 @@ function render() {
     else if (d <= 3) tag = `<span class="tag tag-soon">あと${d}日</span>`;
     else tag = `<span class="tag tag-safe">あと${d}日</span>`;
 
+    const st = b.status || 'unread';
+    const stTag = `<span class="tag ${statusClass[st]}">${statusLabels[st]}</span>`;
+    const pct = b.totalPages > 0 ? Math.min(100, Math.round((b.currentPage||0) / b.totalPages * 100)) : 0;
+    const progressHtml = b.totalPages > 0 ? `<div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <span class="progress-text">${b.currentPage||0}/${b.totalPages}p (${pct}%)</span>
+    </div>` : '';
+    const memoHtml = b.memo ? `<div class="memo">${esc(b.memo)}</div>` : '';
+
     return `<div class="card">
       <div class="card-top">
         <div><div class="book-title">${esc(b.title)}</div>${b.author ? `<div class="book-author">${esc(b.author)}</div>` : ''}</div>
         ${tag}
       </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+        ${stTag}
+        <span style="font-size:12px;color:var(--text-sub)">· 返却日: ${fmtDate(b.dueDate)}</span>
+      </div>
+      ${progressHtml}
+      ${memoHtml}
       <div class="card-meta">
-        <span>返却日: ${fmtDate(b.dueDate)}</span>
+        <span></span>
         <div class="card-actions">
           <button class="btn-s" onclick="openEdit('${b.id}')">編集</button>
           <button class="btn-s" onclick="returnBook('${b.id}')">返却</button>
