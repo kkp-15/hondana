@@ -684,6 +684,7 @@ document.getElementById('fab').onclick = () => {
   document.getElementById('add-pages').value = '';
   document.getElementById('add-memo').value = '';
   mAdd.classList.add('show');
+  mAdd.querySelector('.modal').scrollTop = 0;
 };
 
 document.querySelectorAll('.type-tab').forEach(t => {
@@ -765,6 +766,7 @@ function openEdit(id) {
   updStars();
 
   mEdit.classList.add('show');
+  mEdit.querySelector('.modal').scrollTop = 0;
 }
 
 document.getElementById('btn-update').onclick = () => {
