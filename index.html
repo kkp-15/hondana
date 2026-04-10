@@ -839,10 +839,29 @@ function returnBook(id) {
 // ── Render ──
 function render() {
   const books = load();
-  const borrows = books.filter(b => b.type === 'borrow').sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+  const borrows = books.filter(b => b.type === 'borrow').sort((a,b) => {
+    // 読了は下に（返すだけ）、それ以外は返却期限が近い順
+    const oa = a.status === 'done' ? 1 : 0;
+    const ob = b.status === 'done' ? 1 : 0;
+    if (oa !== ob) return oa - ob;
+    return new Date(a.dueDate) - new Date(b.dueDate);
+  });
   const owns = books.filter(b => b.type === 'own').sort((a,b) => {
+    // ステータス順: 読書中 → 未読 → 読了
     const o = {reading:0, unread:1, done:2};
-    return (o[a.status]??1) - (o[b.status]??1);
+    if ((o[a.status]??1) !== (o[b.status]??1)) return (o[a.status]??1) - (o[b.status]??1);
+    // 読書中: 進捗率が高い順（もうすぐ読み終わる本が上）
+    if (a.status === 'reading' && b.status === 'reading') {
+      const pa = a.totalPages > 0 ? (a.currentPage||0)/a.totalPages : 0;
+      const pb = b.totalPages > 0 ? (b.currentPage||0)/b.totalPages : 0;
+      return pb - pa;
+    }
+    // 未読: 新しく追加した順
+    if (a.status === 'unread' && b.status === 'unread') {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    }
+    // 読了: 新しく追加した順
+    return new Date(b.createdAt) - new Date(a.createdAt);
   });
   const disposed = books.filter(b => b.type === 'dispose').sort((a,b) => new Date(b.disposedAt) - new Date(a.disposedAt));
 
