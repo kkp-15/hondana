@@ -255,7 +255,23 @@
   }
 
   .empty .icon { font-size: 40px; margin-bottom: 10px; }
-  .empty p { font-size: 13px; line-height: 1.6; }
+  .empty p { font-size: 13px; line-height: 1.6; margin-bottom: 18px; }
+
+  .empty-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 22px;
+    border-radius: 26px;
+    background: linear-gradient(135deg, #E8740C, #F09030);
+    color: white;
+    border: none;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(232,116,12,0.35);
+  }
+  .empty-cta:active { transform: scale(0.96); }
 
   /* ── FAB ── */
   .fab {
@@ -278,6 +294,20 @@
   }
 
   .fab:active { transform: scale(0.9); }
+  .fab .fab-label { display: none; }
+
+  @media (min-width: 768px) {
+    .fab {
+      width: auto;
+      height: 56px;
+      padding: 0 22px;
+      font-size: 16px;
+      gap: 6px;
+      font-weight: 700;
+    }
+    .fab .fab-plus { font-size: 22px; line-height: 1; }
+    .fab .fab-label { display: inline; }
+  }
 
   /* ── Modal ── */
   .modal-bg {
@@ -514,6 +544,7 @@
     <div class="empty" id="borrow-empty">
       <div class="icon">📚</div>
       <p>借りている本はありません</p>
+      <button type="button" class="empty-cta" onclick="document.getElementById('fab').click()">＋ 借りた本を追加</button>
     </div>
   </div>
 
@@ -523,6 +554,7 @@
     <div class="empty" id="own-empty">
       <div class="icon">📖</div>
       <p>本を追加してみましょう</p>
+      <button type="button" class="empty-cta" onclick="document.getElementById('fab').click()">＋ 本を追加</button>
     </div>
   </div>
 
@@ -536,7 +568,7 @@
   </div>
 </div>
 
-<button class="fab" id="fab">＋</button>
+<button class="fab" id="fab" aria-label="本を追加"><span class="fab-plus">＋</span><span class="fab-label">本を追加</span></button>
 
 <!-- Bottom Nav -->
 <nav class="bottom-nav">
